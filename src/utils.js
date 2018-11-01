@@ -83,6 +83,7 @@ module.exports = {
   isNumber: isNumber,
   isString: isString,
   isFunction: isFunction,
+  isUndefined: _.isUndefined,
   flatten: baseFlatten,
   shapeSize: shapeSize,
   getType: getType,

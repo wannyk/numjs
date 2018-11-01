@@ -330,13 +330,13 @@ exports.interleave3 = function(x, y, z) {
   y  = (y | (y<<4))  & 3272356035;
   y  = (y | (y<<2))  & 1227133513;
   x |= (y << 1);
-  
+
   z &= 0x3FF;
   z  = (z | (z<<16)) & 4278190335;
   z  = (z | (z<<8))  & 251719695;
   z  = (z | (z<<4))  & 3272356035;
   z  = (z | (z<<2))  & 1227133513;
-  
+
   return x | (z << 2);
 }
 
@@ -2120,7 +2120,7 @@ function Procedure() {
 function compileCwise(user_args) {
   //Create procedure
   var proc = new Procedure()
-  
+
   //Parse blocks
   proc.pre    = user_args.pre
   proc.body   = user_args.body
@@ -2175,12 +2175,12 @@ function compileCwise(user_args) {
       throw new Error("cwise: Unknown argument type " + proc_args[i])
     }
   }
-  
+
   //Make sure at least one array argument was specified
   if(proc.arrayArgs.length <= 0) {
     throw new Error("cwise: No array arguments specified")
   }
-  
+
   //Make sure arguments are correct
   if(proc.pre.args.length > proc_args.length) {
     throw new Error("cwise: Too many arguments in pre() block")
@@ -2194,10 +2194,10 @@ function compileCwise(user_args) {
 
   //Check debug flag
   proc.debug = !!user_args.printCode || !!user_args.debug
-  
+
   //Retrieve name
   proc.funcName = user_args.funcName || "cwise"
-  
+
   //Read in block size
   proc.blockSize = user_args.blockSize || 64
 
@@ -2237,7 +2237,7 @@ function innerFill(order, proc, body) {
   }
   if (vars.length > 0) {
     code.push("var " + vars.join(","))
-  }  
+  }
   //Scan loop
   for(i=dimension-1; i>=0; --i) { // Start at largest stride and work your way inwards
     idx = order[i]
@@ -2445,7 +2445,7 @@ function generateCWiseOp(proc, typesig) {
     dtypes[i] = typesig[2*i]
     orders[i] = typesig[2*i+1]
   }
-  
+
   //Determine where block and loop indices start and end
   var blockBegin = [], blockEnd = [] // These indices are exposed as blocks
   var loopBegin = [], loopEnd = [] // These indices are iterated over
@@ -2475,7 +2475,7 @@ function generateCWiseOp(proc, typesig) {
   var arglist = ["SS"] // SS is the overall shape over which we iterate
   var code = ["'use strict'"]
   var vars = []
-  
+
   for(var j=0; j<dimension; ++j) {
     vars.push(["s", j, "=SS[", j, "]"].join("")) // The limits for each dimension.
   }
@@ -2483,11 +2483,11 @@ function generateCWiseOp(proc, typesig) {
     arglist.push("a"+i) // Actual data array
     arglist.push("t"+i) // Strides
     arglist.push("p"+i) // Offset in the array at which the data starts (also used for iterating over the data)
-    
+
     for(var j=0; j<dimension; ++j) { // Unpack the strides into vars for looping
       vars.push(["t",i,"p",j,"=t",i,"[",loopBegin[i]+j,"]"].join(""))
     }
-    
+
     for(var j=0; j<Math.abs(proc.arrayBlockIndices[i]); ++j) { // Unpack the strides into vars for block iteration
       vars.push(["t",i,"b",j,"=t",i,"[",blockBegin[i]+j,"]"].join(""))
     }
@@ -2513,7 +2513,7 @@ function generateCWiseOp(proc, typesig) {
       if(off_arg.offset[j] === 0) {
         continue
       } else if(off_arg.offset[j] === 1) {
-        init_string.push(["t", off_arg.array, "p", j].join(""))      
+        init_string.push(["t", off_arg.array, "p", j].join(""))
       } else {
         init_string.push([off_arg.offset[j], "*t", off_arg.array, "p", j].join(""))
       }
@@ -2536,7 +2536,7 @@ function generateCWiseOp(proc, typesig) {
   for(var i=0; i<proc.arrayArgs.length; ++i) {
     code.push("p"+i+"|=0")
   }
-  
+
   //Inline prelude
   if(proc.pre.body.length > 3) {
     code.push(processBlock(proc.pre, proc, dtypes))
@@ -2555,11 +2555,11 @@ function generateCWiseOp(proc, typesig) {
   if(proc.post.body.length > 3) {
     code.push(processBlock(proc.post, proc, dtypes))
   }
-  
+
   if(proc.debug) {
     console.log("-----Generated cwise routine for ", typesig, ":\n" + code.join("\n") + "\n----------")
   }
-  
+
   var loopName = [(proc.funcName||"unnamed"), "_cwise_loop_", orders[0].join("s"),"m",matched,typeSummary(dtypes)].join("")
   var f = new Function(["function ",loopName,"(", arglist.join(","),"){", code.join("\n"),"} return ", loopName].join(""))
   return f()
@@ -2598,7 +2598,7 @@ function createThunk(proc) {
   var code = ["'use strict'", "var CACHED={}"]
   var vars = []
   var thunkName = proc.funcName + "_cwise_thunk"
-  
+
   //Build thunk
   code.push(["return function ", thunkName, "(", proc.shimArgs.join(","), "){"].join(""))
   var typesig = []
@@ -2638,7 +2638,7 @@ function createThunk(proc) {
   vars.push(["type=[", string_typesig.join(","), "].join()"].join(""))
   vars.push("proc=CACHED[type]")
   code.push("var " + vars.join(","))
-  
+
   code.push(["if(!proc){",
              "CACHED[type]=proc=compile([", typesig.join(","), "])}",
              "return proc(", proc_args.join(","), ")}"].join(""))
@@ -2646,7 +2646,7 @@ function createThunk(proc) {
   if(proc.debug) {
     console.log("-----Generated thunk:\n" + code.join("\n") + "\n----------")
   }
-  
+
   //Compile thunk
   var thunk = new Function("compile", code.join("\n"))
   return thunk(compile.bind(undefined, proc))
@@ -19974,17 +19974,17 @@ function ndfft(dir, x, y) {
     , y2 = ndarray(buffer, shape.slice(0), stride.slice(0), 3*size)
     , tmp, n, s1, s2
     , scratch_ptr = 4 * size
-  
+
   //Copy into x1/y1
   ops.assign(x1, x)
   ops.assign(y1, y)
-  
+
   for(i=d-1; i>=0; --i) {
     fftm(dir, size/shape[i], shape[i], buffer, x1.offset, y1.offset, scratch_ptr)
     if(i === 0) {
       break
     }
-    
+
     //Compute new stride for x2/y2
     n = 1
     s1 = x2.stride
@@ -19997,11 +19997,11 @@ function ndfft(dir, x, y) {
       s2[j] = s1[j] = n
       n *= shape[j]
     }
-    
+
     //Transpose
     ops.assign(x2, x1)
     ops.assign(y2, y1)
-    
+
     //Swap buffers
     tmp = x1
     x1 = x2
@@ -20010,11 +20010,11 @@ function ndfft(dir, x, y) {
     y1 = y2
     y2 = tmp
   }
-  
+
   //Copy result back into x
   ops.assign(x, x1)
   ops.assign(y, y1)
-  
+
   pool.free(buffer)
 }
 
@@ -20054,12 +20054,12 @@ function fftRadix2(dir, nrows, ncols, buffer, x_ptr, y_ptr) {
   y_ptr |= 0
   var nn,m,i,i1,j,k,i2,l,l1,l2
   var c1,c2,t,t1,t2,u1,u2,z,row,a,b,c,d,k1,k2,k3
-  
+
   // Calculate the number of points
   nn = ncols
   m = bits.log2(nn)
-  
-  for(row=0; row<nrows; ++row) {  
+
+  for(row=0; row<nrows; ++row) {
     // Do the bit reversal
     i2 = nn >> 1;
     j = 0;
@@ -20079,7 +20079,7 @@ function fftRadix2(dir, nrows, ncols, buffer, x_ptr, y_ptr) {
       }
       j += k
     }
-    
+
     // Compute the FFT
     c1 = -1.0
     c2 = 0.0
@@ -20118,7 +20118,7 @@ function fftRadix2(dir, nrows, ncols, buffer, x_ptr, y_ptr) {
       }
       c1 = Math.sqrt((1.0 + c1) / 2.0)
     }
-    
+
     // Scaling for inverse transform
     if(dir < 0) {
       var scale_f = 1.0 / nn
@@ -20127,7 +20127,7 @@ function fftRadix2(dir, nrows, ncols, buffer, x_ptr, y_ptr) {
         buffer[y_ptr+i] *= scale_f
       }
     }
-    
+
     // Advance pointers
     x_ptr += ncols
     y_ptr += ncols
@@ -20170,17 +20170,17 @@ function fftBluestein(dir, nrows, ncols, buffer, x_ptr, y_ptr, scratch_ptr) {
   }
 
   fftRadix2(1, 1, m, buffer, cft_ptr, sft_ptr)
-  
+
   //Compute scale factor
   if(dir < 0) {
     w = 1.0 / ncols
   } else {
     w = 1.0
   }
-  
+
   //Handle direction
   for(row=0; row<nrows; ++row) {
-  
+
     // Copy row into scratch memory, multiply weights
     for(i=0; i<ncols; ++i) {
       a = buffer[x_ptr+i]
@@ -20200,10 +20200,10 @@ function fftBluestein(dir, nrows, ncols, buffer, x_ptr, y_ptr, scratch_ptr) {
     for(i=ncols; i<m; ++i) {
       buffer[ys_ptr+i] = 0.0
     }
-    
+
     // FFT buffer
     fftRadix2(1, 1, m, buffer, xs_ptr, ys_ptr)
-    
+
     // Apply multiplier
     for(i=0; i<m; ++i) {
       a = buffer[xs_ptr+i]
@@ -20216,10 +20216,10 @@ function fftBluestein(dir, nrows, ncols, buffer, x_ptr, y_ptr, scratch_ptr) {
       buffer[xs_ptr+i] = k1 - k3
       buffer[ys_ptr+i] = k1 + k2
     }
-    
+
     // Inverse FFT buffer
     fftRadix2(-1, 1, m, buffer, xs_ptr, ys_ptr)
-    
+
     // Copy result back into x/y
     for(i=0; i<ncols; ++i) {
       a = buffer[xs_ptr+i]
@@ -20232,7 +20232,7 @@ function fftBluestein(dir, nrows, ncols, buffer, x_ptr, y_ptr, scratch_ptr) {
       buffer[x_ptr+i] = w * (k1 - k3)
       buffer[y_ptr+i] = w * (k1 + k2)
     }
-    
+
     x_ptr += ncols
     y_ptr += ncols
   }
@@ -20420,7 +20420,7 @@ function generateRowColumnLoop(oType, aType, bType, useAlpha, useBeta) {
   var symbols = ["i", "j"]
 
   code.push.apply(code, start(oOrd, "o", oType))
-  
+
   if(oOrd[1]) {
     code.push("for(j=0;j<od1;++j){")
     code.push("for(i=0;i<od0;++i){")
@@ -20435,8 +20435,8 @@ function generateRowColumnLoop(oType, aType, bType, useAlpha, useBeta) {
   code.push(
       "var r=0.0;",
       "for(k=0;k<ad1;++k){",
-      "r+=", 
-        read(aOrd, "a", aType, "i", "k"), "*", 
+      "r+=",
+        read(aOrd, "a", aType, "i", "k"), "*",
         read(bOrd, "b", bType, "k", "j"), ";")
 
   //Terminate k loop
@@ -20452,7 +20452,7 @@ function generateRowColumnLoop(oType, aType, bType, useAlpha, useBeta) {
     code.push("r+=B*", read(oOrd, "o", oType, "i", "j"), ";")
   }
   code.push.apply(code, write(oOrd, "o", oType, "i", "j", "r"))
-  
+
   //Terminate j loop loop
   code.push.apply(code, walk(oOrd, "o", oType, 0, symbols[1]))
   code.push("}")
@@ -20479,7 +20479,7 @@ function generateBetaPass(oType, useBeta) {
     symbols = ["j", "i"]
   }
   if(useBeta) {
-    code.push.apply(code, write(oOrd, "o", oType, "i", "j", 
+    code.push.apply(code, write(oOrd, "o", oType, "i", "j",
       "B*"+read(oOrd, "o", oType, "i", "j")))
   } else {
     code.push.apply(code, write(oOrd, "o", oType, "i", "j", "0"))
@@ -20517,7 +20517,7 @@ function generateBlockLoop(oType, aType, bType, useAlpha, useBeta) {
   }
 
   code.push.apply(code, start(oOrd, "o", oType, "i0", "i1", "w1"))
-  
+
   code.push("for(i=0;i<w0;++i){\
 for(j=0;j<w1;++j){\
 var r=0.0;")
@@ -20528,7 +20528,7 @@ var r=0.0;")
   code.push("for(k=0;k<w2;++k){")
 
   code.push("r+=",
-    read(aOrd, "a", aType, "(i0+i)", "(i2+k)"), "*", 
+    read(aOrd, "a", aType, "(i0+i)", "(i2+k)"), "*",
     read(bOrd, "b", bType, "(i2+k)", "(i1+j)"), ";")
 
   //Close off k-loop
@@ -20541,7 +20541,7 @@ var r=0.0;")
   if(useAlpha) {
     sym = "A*r"
   }
-  code.push.apply(code, write(oOrd, "o", oType, "(i0+i)", "(i1+j)", 
+  code.push.apply(code, write(oOrd, "o", oType, "(i0+i)", "(i1+j)",
     sym + "+" + read(oOrd, "o", oType, "(i0+i)", "(i1+j)")))
 
   //Close off j-loop
@@ -20556,14 +20556,14 @@ var r=0.0;")
 }
 
 function generateMatrixProduct(outType, aType, bType, useAlpha, useBeta) {
-  var funcName = ["gemm", outType[0], outType[1], 
+  var funcName = ["gemm", outType[0], outType[1],
                      "a", aType[0], aType[1],
                      "b", bType[0], bType[1],
                      useAlpha ? "alpha" : "",
                      useBeta ? "beta" : "" ].join("")
   var code = [
     "function ", funcName, "(o,a,b,A,B){",
-    "var ", unpackShape("o", outType), 
+    "var ", unpackShape("o", outType),
             unpackShape("a", aType),
             unpackShape("b", bType),
             "i,j,k;"
@@ -20898,7 +20898,7 @@ exports.norm2squared = compile({
   post: {args:[], localVars:[], thisVars:["this_s"], body:"return this_s"},
   funcName: "norm2squared"
 })
-  
+
 exports.norm2 = compile({
   args:["array"],
   pre: {args:[], localVars:[], thisVars:["this_s"], body:"this_s=0"},
@@ -20906,7 +20906,7 @@ exports.norm2 = compile({
   post: {args:[], localVars:[], thisVars:["this_s"], body:"return Math.sqrt(this_s)"},
   funcName: "norm2"
 })
-  
+
 
 exports.norminf = compile({
   args:["array"],
@@ -21010,7 +21010,7 @@ exports.argmax = compile({
     args:[],
     thisVars:["this_i"],
     localVars:[]}
-})  
+})
 
 exports.random = makeOp({
   args: ["array"],
@@ -21034,9 +21034,9 @@ exports.equals = compile({
   args:["array", "array"],
   pre: EmptyProc,
   body: {args:[{name:"x", lvalue:false, rvalue:true, count:1},
-               {name:"y", lvalue:false, rvalue:true, count:1}], 
-        body: "if(x!==y){return false}", 
-        localVars: [], 
+               {name:"y", lvalue:false, rvalue:true, count:1}],
+        body: "if(x!==y){return false}",
+        localVars: [],
         thisVars: []},
   post: {args:[], localVars:[], thisVars:[], body:"return true"},
   funcName: "equals"
@@ -21877,11 +21877,11 @@ exports.freeUint32 =
 exports.freeInt8 =
 exports.freeInt16 =
 exports.freeInt32 =
-exports.freeFloat32 = 
+exports.freeFloat32 =
 exports.freeFloat =
-exports.freeFloat64 = 
-exports.freeDouble = 
-exports.freeUint8Clamped = 
+exports.freeFloat64 =
+exports.freeDouble =
+exports.freeUint8Clamped =
 exports.freeDataView = freeTypedArray
 
 exports.freeArrayBuffer = freeArrayBuffer
@@ -23529,6 +23529,8 @@ module.exports = {
   identity: identity,
   stack: stack,
   rot90: rot90,
+  getRows: getRows,
+  getRow: getRow,
   int8: function (array) { return NdArray.new(array, 'int8'); },
   uint8: function (array) { return NdArray.new(array, 'uint8'); },
   int16: function (array) { return NdArray.new(array, 'int16'); },
@@ -24552,6 +24554,37 @@ NdArray.prototype.fftconvolve = function (filter) {
   return out;
 };
 
+/**
+* Extract a series of "rows" from a 2d NdArray object
+* @param  NdArray of indices
+*
+* @return NdArray of rows
+*/
+NdArray.prototype.getRow = function (index) {
+  if (_.isUndefined(index)) {
+    throw error.ValueError("instance method `getRow` requires parameter `index`");
+  }
+  var width = this.shape[this.shape.length - 1];
+  if ((index * width) + width > this.size) {
+    throw new errors.ValueError("improper index size "+" "+ index +" "+  width +" "+ this.size);
+  }
+
+  var resultRow = [];
+  for (var i = 0; i < width; i++) {
+    resultRow.push(this.get(index, i));
+  }
+
+  return resultRow;
+};
+
+NdArray.prototype.getRows = function (indices) {
+  var resultingRows = [];
+  for (var i = 0; i < indices.size; i++) {
+    resultingRows.push(this.getRow(indices.get(i)));
+  }
+  return createArray(resultingRows, this.dtype);
+};
+
 function createArray (arr, dtype) {
   if (arr instanceof NdArray) { return arr; }
   var T = _.getType(dtype);
@@ -24606,7 +24639,7 @@ function formatNumber (v) {
   return String(Number((v || 0).toFixed(CONF.nFloatingValues)));
 }
 
-},{"./config":23,"./errors":25,"./utils":43,"cwise/lib/wrapper":7,"ndarray":18,"ndarray-fft":13,"ndarray-gemm":15,"ndarray-ops":17,"typedarray-pool":21}],43:[function(require,module,exports){
+},{"./config":24,"./errors":26,"./utils":44,"cwise/lib/wrapper":8,"ndarray":19,"ndarray-fft":14,"ndarray-gemm":16,"ndarray-ops":18,"typedarray-pool":22}],44:[function(require,module,exports){
 'use strict';
 var DTYPES = require('./dtypes');
 var _ = require('lodash');
@@ -24692,6 +24725,7 @@ module.exports = {
   isNumber: isNumber,
   isString: isString,
   isFunction: isFunction,
+  isUndefined: _.isUndefined,
   flatten: baseFlatten,
   shapeSize: shapeSize,
   getType: getType,
